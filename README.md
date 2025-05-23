@@ -1,82 +1,146 @@
-# aws-lambda-example serverless API
-The aws-lambda-example project, created with [`aws-serverless-java-container`](https://github.com/aws/serverless-java-container).
+# AWS Lambda Course Management API
 
-The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
+![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-orange?style=for-the-badge&logo=amazon-aws)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.4-green?style=for-the-badge&logo=spring-boot)
+![Java](https://img.shields.io/badge/Java-17-blue?style=for-the-badge&logo=java)
 
-The project folder also includes a `template.yml` file. You can use this [SAM](https://github.com/awslabs/serverless-application-model) file to deploy the project to AWS Lambda and Amazon API Gateway or test in local with the [SAM CLI](https://github.com/awslabs/aws-sam-cli). 
+A serverless RESTful API for course management built with Spring Boot and AWS Lambda. This application allows you to create, read, update, and delete course information through a simple REST interface, all running on AWS's serverless infrastructure.
 
-## Pre-requisites
-* [AWS CLI](https://aws.amazon.com/cli/)
-* [SAM CLI](https://github.com/awslabs/aws-sam-cli)
-* [Gradle](https://gradle.org/) or [Maven](https://maven.apache.org/)
+## 📋 Table of Contents
 
-## Building the project
-You can use the SAM CLI to quickly build the project
-```bash
-$ mvn archetype:generate -DartifactId=aws-lambda-example -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=2.1.3 -DgroupId=com.api.terraform.pipeline -Dversion=1.0-SNAPSHOT -Dinteractive=false
-$ cd aws-lambda-example
-$ sam build
-Building resource 'AwsLambdaExampleFunction'
-Running JavaGradleWorkflow:GradleBuild
-Running JavaGradleWorkflow:CopyArtifacts
+- [Architecture](#-architecture)
+- [Features](#-features)
+- [API Endpoints](#-api-endpoints)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+- [Local Development](#-local-development)
+- [Deployment](#-deployment)
+- [Technologies Used](#-technologies-used)
 
-Build Succeeded
+## 🏗 Architecture
 
-Built Artifacts  : .aws-sam/build
-Built Template   : .aws-sam/build/template.yaml
+This application follows a serverless architecture pattern:
 
-Commands you can use next
-=========================
-[*] Invoke Function: sam local invoke
-[*] Deploy: sam deploy --guided
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│  API        │────▶│  AWS        │────▶│  Spring     │
+│  Gateway    │     │  Lambda     │     │  Boot App   │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-## Testing locally with the SAM CLI
+- **API Gateway**: Routes HTTP requests to the Lambda function
+- **AWS Lambda**: Executes the Spring Boot application in a serverless environment
+- **Spring Boot**: Handles business logic and provides REST endpoints
 
-From the project root folder - where the `template.yml` file is located - start the API with the SAM CLI.
+The application uses the AWS Serverless Java Container library to bridge Spring Boot with AWS Lambda, allowing a standard Spring Boot application to run efficiently in a serverless environment.
 
-```bash
-$ sam local start-api
+## ✨ Features
 
-...
-Mounting com.amazonaws.serverless.archetypes.StreamLambdaHandler::handleRequest (java11) at http://127.0.0.1:3000/{proxy+} [OPTIONS GET HEAD POST PUT DELETE PATCH]
-...
-```
+- **Course Management**: Create, read, update, and delete course information
+- **RESTful API**: Standard HTTP methods for interacting with resources
+- **Serverless Architecture**: No server management required, scales automatically
+- **Low Cost**: Pay only for what you use with AWS Lambda's pricing model
 
-Using a new shell, you can send a test ping request to your API:
+## 🔌 API Endpoints
 
-```bash
-$ curl -s http://127.0.0.1:3000/ping | python -m json.tool
+| Method | Endpoint         | Description                   | Request Body    | Response        |
+|--------|------------------|-------------------------------|-----------------|-----------------|
+| GET    | /ping            | Health check endpoint         | -               | `{"pong": "Hello, World!"}` |
+| GET    | /courses         | Get all courses               | -               | Array of Course objects |
+| GET    | /courses/{id}    | Get course by ID              | -               | Course object or 404 |
+| POST   | /courses         | Create a new course           | Course object   | Created Course object |
+| PUT    | /courses/{id}    | Update an existing course     | Course object   | 200 OK or 404 Not Found |
+| DELETE | /courses/{id}    | Delete a course               | -               | 200 OK or 404 Not Found |
 
+### Course Object Structure
+
+```json
 {
-    "pong": "Hello, World!"
+  "id": 1,
+  "name": "Introduction to AWS Lambda",
+  "price": 99.99
 }
-``` 
-
-## Deploying to AWS
-To deploy the application in your AWS account, you can use the SAM CLI's guided deployment process and follow the instructions on the screen
-
-```
-$ sam deploy --guided
 ```
 
-Once the deployment is completed, the SAM CLI will print out the stack's outputs, including the new application URL. You can use `curl` or a web browser to make a call to the URL
+## 📋 Prerequisites
 
+- [AWS CLI](https://aws.amazon.com/cli/) - Configured with appropriate permissions
+- [SAM CLI](https://github.com/awslabs/aws-sam-cli) - For local testing and deployment
+- [Java 17](https://adoptium.net/) - Required for development
+- [Maven](https://maven.apache.org/) - For building the project
+
+## 🚀 Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/aws-lambda-example.git
+   cd aws-lambda-example
+   ```
+
+2. Build the project:
+   ```bash
+   mvn clean package
+   ```
+
+## 💻 Local Development
+
+You can test the application locally using the SAM CLI:
+
+1. Build the application:
+   ```bash
+   sam build
+   ```
+
+2. Start the local API:
+   ```bash
+   sam local start-api
+   ```
+
+3. Test the API:
+   ```bash
+   # Test the ping endpoint
+   curl -s http://127.0.0.1:3000/ping | python -m json.tool
+
+   # Get all courses
+   curl -s http://127.0.0.1:3000/courses | python -m json.tool
+
+   # Create a new course
+   curl -s -X POST http://127.0.0.1:3000/courses \
+     -H "Content-Type: application/json" \
+     -d '{"name":"AWS Lambda Masterclass","price":149.99}' | python -m json.tool
+   ```
+
+## 🌩 Deployment
+
+Deploy the application to AWS using the SAM CLI:
+
+```bash
+sam deploy --guided
 ```
-...
+
+Follow the prompts to configure your deployment. Once deployed, SAM will output the API Gateway URL that you can use to access your application.
+
+Example:
+```
 -------------------------------------------------------------------------------------------------------------
 OutputKey-Description                        OutputValue
 -------------------------------------------------------------------------------------------------------------
-AwsLambdaExampleApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
+AwsLambdaExampleApi - URL for application    https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/
 -------------------------------------------------------------------------------------------------------------
 ```
 
-Copy the `OutputValue` into a browser or use curl to test your first request:
+## 🛠 Technologies Used
 
-```bash
-$ curl -s https://xxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/ping | python -m json.tool
+- **Spring Boot 3**: Java framework for building web applications
+- **AWS Lambda**: Serverless compute service
+- **AWS API Gateway**: Managed service for creating, publishing, and securing APIs
+- **AWS SAM**: Serverless Application Model for easier deployment
+- **Java 17**: Programming language
+- **Maven**: Build and dependency management
+- **Lombok**: Reduces boilerplate code
 
-{
-    "pong": "Hello, World!"
-}
-```
+---
+
+Built with ❤️ using [AWS Serverless Java Container](https://github.com/aws/serverless-java-container)
